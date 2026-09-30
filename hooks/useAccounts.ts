@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Account, AccountWithStatus } from "@/types";
 import { DEMO_ACCOUNTS } from "@/constants/demoData";
-import { getStatusAndCountdown, calculateReadyAt, formatDurationObj } from "@/utils/date";
+import { getStatusAndCountdown, calculateReadyAt } from "@/utils/date";
 import { supabase } from "@/lib/supabase";
 
 const STORAGE_KEY = "account_ready_checker_data";
@@ -101,7 +101,6 @@ export function useAccounts(userId?: string | null) {
         (payload) => {
           if (payload.eventType === "INSERT") {
             const newAcc = mapRowToAccount(payload.new);
-            // Check if account belongs to this user or if public
             if (!userId || payload.new.user_id === userId) {
               setAccounts((prev) => {
                 if (prev.some((a) => a.id === newAcc.id)) return prev;
@@ -174,8 +173,10 @@ export function useAccounts(userId?: string | null) {
       prevReadyMap.current.set(acc.id, isNowReady);
 
       // Automatically set Daily Limit to "100%" when reset time is over (status === "Ready") for Daily limit accounts
+      // If user has explicitly entered a custom dailyLimit (like 20, 50, or "No Limit"), respect their value unless it was 0 or 100%
       const resetType = acc.limitResetType || "Daily";
-      const computedDailyLimit = (resetType === "Daily" && isNowReady) ? "100%" : acc.dailyLimit;
+      const shouldAutoResetDaily = resetType === "Daily" && isNowReady && (acc.dailyLimit === 0 || acc.dailyLimit === "0" || acc.dailyLimit === "100%");
+      const computedDailyLimit = shouldAutoResetDaily ? "100%" : acc.dailyLimit;
 
       return {
         ...acc,
@@ -212,24 +213,37 @@ export function useAccounts(userId?: string | null) {
     });
   }, [userId]);
 
-  const updateAccount = useCallback((id: string, updatedFields: Partial<Account>) => {
-    let updatedAcc: Account | undefined;
+  const updateAccount = useCallback(async (id: string, updatedFields: Partial<Account>) => {
+    const now = Date.now();
+
+    // 1. Immediately update React state and local storage cache
     setAccounts((prev) =>
-      prev.map((acc) => {
-        if (acc.id === id) {
-          updatedAcc = { ...acc, ...updatedFields, modifiedAt: Date.now() };
-          return updatedAcc;
-        }
-        return acc;
-      })
+      prev.map((acc) => (acc.id === id ? { ...acc, ...updatedFields, modifiedAt: now } : acc))
     );
 
-    if (updatedAcc) {
-      supabase.from("accounts").update(mapAccountToRow(updatedAcc, userId)).eq("id", id).then(({ error }) => {
-        if (error) console.error("Supabase update error:", error);
-      });
+    // 2. Prepare database payload with all updated fields
+    const updatePayload: Record<string, any> = {
+      modified_at: now,
+    };
+    if (updatedFields.email !== undefined) updatePayload.email = updatedFields.email;
+    if (updatedFields.isPremium !== undefined) updatePayload.is_premium = updatedFields.isPremium;
+    if (updatedFields.weeklyLimit !== undefined) updatePayload.weekly_limit = updatedFields.weeklyLimit;
+    if (updatedFields.dailyLimit !== undefined) updatePayload.daily_limit = String(updatedFields.dailyLimit);
+    if (updatedFields.limitResetType !== undefined) updatePayload.limit_reset_type = updatedFields.limitResetType;
+    if (updatedFields.checkingDate !== undefined) updatePayload.checking_date = updatedFields.checkingDate;
+    if (updatedFields.checkingTime !== undefined) updatePayload.checking_time = updatedFields.checkingTime;
+    if (updatedFields.resetDuration !== undefined) updatePayload.reset_duration = updatedFields.resetDuration;
+
+    // 3. Persist update directly into Supabase database
+    try {
+      const { error } = await supabase.from("accounts").update(updatePayload).eq("id", id);
+      if (error) {
+        console.error("Supabase update error:", error);
+      }
+    } catch (err) {
+      console.error("Supabase update exception:", err);
     }
-  }, [userId]);
+  }, []);
 
   const deleteAccount = useCallback((id: string) => {
     setAccounts((prev) => prev.filter((acc) => acc.id !== id));
@@ -279,15 +293,16 @@ export function useAccounts(userId?: string | null) {
       const duplicated: Account = {
         ...original,
         id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
-        modifiedAt: Date.now()
+        modifiedAt: Date.now(),
       };
-      const newAccounts = [...prev];
-      newAccounts.splice(idx + 1, 0, duplicated);
-
+      
+      // Sync to Supabase
       supabase.from("accounts").insert(mapAccountToRow(duplicated, userId)).then(({ error }) => {
         if (error) console.error("Supabase duplicate insert error:", error);
       });
 
+      const newAccounts = [...prev];
+      newAccounts.splice(idx + 1, 0, duplicated);
       return newAccounts;
     });
   }, [userId]);
@@ -310,14 +325,15 @@ export function useAccounts(userId?: string | null) {
           removedIds.push(acc.id);
         }
       }
+
+      if (removedIds.length > 0) {
+        supabase.from("accounts").delete().in("id", removedIds).then(({ error }) => {
+          if (error) console.error("Supabase removeDuplicates delete error:", error);
+        });
+      }
+
       return uniqueAccounts;
     });
-
-    if (removedIds.length > 0) {
-      supabase.from("accounts").delete().in("id", removedIds).then(({ error }) => {
-        if (error) console.error("Supabase removeDuplicates delete error:", error);
-      });
-    }
 
     return removed;
   }, []);
