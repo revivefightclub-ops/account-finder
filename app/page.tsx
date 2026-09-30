@@ -2,6 +2,7 @@
 
 import { useState, useRef, useMemo, useEffect } from "react";
 import { useAccounts } from "@/hooks/useAccounts";
+import { useAuth } from "@/hooks/useAuth";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSidebar } from "@/hooks/useSidebar";
 import { useProfile } from "@/hooks/useProfile";
@@ -12,9 +13,10 @@ import { EditAccountModal } from "@/features/EditAccountModal";
 import { DeleteDialog } from "@/features/DeleteDialog";
 import { ProfileModal } from "@/features/ProfileModal";
 import { FullscreenAccountModal } from "@/features/FullscreenAccountModal";
+import { AuthModal } from "@/features/AuthModal";
 import { exportToCSV, parseCSV } from "@/utils/csv";
 import { AccountWithStatus } from "@/types";
-import { Search, Filter, Menu, Bell, Download, Upload, Plus, LayoutDashboard, Users, LineChart, Settings, HelpCircle, UserX, Camera, Sun, Moon, Sparkles, CheckCircle2, Clock, ShieldCheck, Zap, Maximize2, Minimize2, Monitor, BarChart2 } from "lucide-react";
+import { Search, Filter, Menu, Bell, Download, Upload, Plus, LayoutDashboard, Users, LineChart, Settings, HelpCircle, UserX, Camera, Sun, Moon, Sparkles, CheckCircle2, Clock, ShieldCheck, Zap, Maximize2, Minimize2, Monitor, BarChart2, LogIn, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 function StatCard({ 
@@ -63,6 +65,8 @@ function StatCard({
 }
 
 function DashboardContent() {
+  const { user, signIn, signUp, signOut } = useAuth();
+
   const {
     accounts,
     rawAccounts,
@@ -77,7 +81,7 @@ function DashboardContent() {
     batchUpdateResetType,
     removeDuplicates,
     setAllAccounts,
-  } = useAccounts();
+  } = useAccounts(user?.id);
 
   const {
     isExpanded,
@@ -94,6 +98,7 @@ function DashboardContent() {
 
   const [activeTab, setActiveTab] = useState<"dashboard" | "analytics">("dashboard");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<AccountWithStatus | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -674,6 +679,38 @@ function DashboardContent() {
 
             <div className="w-px h-6 bg-outline-variant mx-0.5 hidden sm:block" />
             
+            {/* User Auth Action Group */}
+            {user ? (
+              <div className="flex items-center gap-2">
+                <span 
+                  className="hidden md:inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 truncate max-w-[150px]" 
+                  title={user.email || ""}
+                >
+                  {user.email}
+                </span>
+                <button
+                  onClick={async () => {
+                    await signOut();
+                    addToast("Signed out successfully", "info");
+                  }}
+                  className="p-1.5 sm:px-2.5 sm:py-1.5 border border-outline-variant hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-on-surface rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="px-2.5 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-bold hover:bg-primary/90 transition-all shadow-sm flex items-center gap-1.5"
+                title="Sign In or Register"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Sign In</span>
+              </button>
+            )}
+
             {/* Header Avatar Profile Icon */}
             <button
               onClick={() => setIsProfileModalOpen(true)}
@@ -1108,6 +1145,13 @@ function DashboardContent() {
         isOpen={deleteDialogState.isOpen}
         onClose={() => setDeleteDialogState({ isOpen: false, id: null })}
         onConfirm={handleDeleteConfirm}
+      />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSignIn={signIn}
+        onSignUp={signUp}
       />
     </div>
   );

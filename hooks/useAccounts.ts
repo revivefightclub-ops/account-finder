@@ -5,7 +5,6 @@ import { Account, AccountWithStatus } from "@/types";
 import { DEMO_ACCOUNTS } from "@/constants/demoData";
 import { getStatusAndCountdown, calculateReadyAt, formatDurationObj } from "@/utils/date";
 import { supabase } from "@/lib/supabase";
-import { differenceInDays, differenceInHours, differenceInMinutes, parse } from "date-fns";
 
 const STORAGE_KEY = "account_ready_checker_data";
 
@@ -30,7 +29,7 @@ function mapRowToAccount(row: any): Account {
   };
 }
 
-function mapAccountToRow(acc: Account) {
+function mapAccountToRow(acc: Account, userId?: string | null) {
   return {
     id: acc.id,
     email: acc.email,
@@ -42,21 +41,26 @@ function mapAccountToRow(acc: Account) {
     checking_time: acc.checkingTime,
     reset_duration: acc.resetDuration,
     modified_at: acc.modifiedAt || Date.now(),
+    user_id: userId || null,
   };
 }
 
-export function useAccounts() {
+export function useAccounts(userId?: string | null) {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const prevReadyMap = useRef<Map<string, boolean>>(new Map());
 
-  // Load from Supabase DB, fallback to Local Storage
+  // Load from Supabase DB (filtered by userId if logged in) with Local Storage fallback
   useEffect(() => {
     async function loadAccounts() {
       try {
-        // Attempt to fetch from Supabase
-        const { data: dbRows, error } = await supabase.from("accounts").select("*");
-        if (!error && dbRows && dbRows.length > 0) {
+        let query = supabase.from("accounts").select("*");
+        if (userId) {
+          query = query.eq("user_id", userId);
+        }
+
+        const { data: dbRows, error } = await query;
+        if (!error && dbRows) {
           const mappedDbAccounts = dbRows.map(mapRowToAccount);
           setAccounts(mappedDbAccounts);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(mappedDbAccounts));
@@ -64,7 +68,7 @@ export function useAccounts() {
           return;
         }
       } catch (err) {
-        console.warn("Supabase fetch failed, falling back to local storage:", err);
+        console.warn("Supabase fetch error, falling back to local storage:", err);
       }
 
       // Local storage fallback
@@ -85,7 +89,42 @@ export function useAccounts() {
     }
 
     loadAccounts();
-  }, []);
+  }, [userId]);
+
+  // Real-time Supabase Database Listener
+  useEffect(() => {
+    const channel = supabase
+      .channel("accounts-realtime-channel")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "accounts" },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            const newAcc = mapRowToAccount(payload.new);
+            // Check if account belongs to this user or if public
+            if (!userId || payload.new.user_id === userId) {
+              setAccounts((prev) => {
+                if (prev.some((a) => a.id === newAcc.id)) return prev;
+                return [...prev, newAcc];
+              });
+            }
+          } else if (payload.eventType === "UPDATE") {
+            const updated = mapRowToAccount(payload.new);
+            if (!userId || payload.new.user_id === userId) {
+              setAccounts((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+            }
+          } else if (payload.eventType === "DELETE") {
+            const deletedId = payload.old.id;
+            setAccounts((prev) => prev.filter((a) => a.id !== deletedId));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
 
   // Request Notification permission
   useEffect(() => {
@@ -109,7 +148,7 @@ export function useAccounts() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(Date.now());
-    }, 1000); // 1 second ticker
+    }, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -168,10 +207,10 @@ export function useAccounts() {
     setAccounts((prev) => [...prev, newAcc]);
     
     // Sync to Supabase
-    supabase.from("accounts").insert(mapAccountToRow(newAcc)).then(({ error }) => {
+    supabase.from("accounts").insert(mapAccountToRow(newAcc, userId)).then(({ error }) => {
       if (error) console.error("Supabase insert error:", error);
     });
-  }, []);
+  }, [userId]);
 
   const updateAccount = useCallback((id: string, updatedFields: Partial<Account>) => {
     let updatedAcc: Account | undefined;
@@ -186,11 +225,11 @@ export function useAccounts() {
     );
 
     if (updatedAcc) {
-      supabase.from("accounts").update(mapAccountToRow(updatedAcc)).eq("id", id).then(({ error }) => {
+      supabase.from("accounts").update(mapAccountToRow(updatedAcc, userId)).eq("id", id).then(({ error }) => {
         if (error) console.error("Supabase update error:", error);
       });
     }
-  }, []);
+  }, [userId]);
 
   const deleteAccount = useCallback((id: string) => {
     setAccounts((prev) => prev.filter((acc) => acc.id !== id));
@@ -245,13 +284,13 @@ export function useAccounts() {
       const newAccounts = [...prev];
       newAccounts.splice(idx + 1, 0, duplicated);
 
-      supabase.from("accounts").insert(mapAccountToRow(duplicated)).then(({ error }) => {
+      supabase.from("accounts").insert(mapAccountToRow(duplicated, userId)).then(({ error }) => {
         if (error) console.error("Supabase duplicate insert error:", error);
       });
 
       return newAccounts;
     });
-  }, []);
+  }, [userId]);
 
   const removeDuplicates = useCallback((): number => {
     let removed = 0;
@@ -287,11 +326,11 @@ export function useAccounts() {
     const mapped = newAccounts.map(a => ({ ...a, modifiedAt: a.modifiedAt || Date.now() }));
     setAccounts(mapped);
 
-    const rows = mapped.map(mapAccountToRow);
+    const rows = mapped.map(a => mapAccountToRow(a, userId));
     supabase.from("accounts").upsert(rows).then(({ error }) => {
       if (error) console.error("Supabase setAllAccounts upsert error:", error);
     });
-  }, []);
+  }, [userId]);
 
   return {
     accounts: accountsWithStatus,
