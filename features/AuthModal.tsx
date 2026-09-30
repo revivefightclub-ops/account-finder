@@ -58,18 +58,19 @@ export function AuthModal({ isOpen, onClose, onSignIn, onSignUp }: AuthModalProp
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="bg-surface rounded-2xl border border-outline-variant/60 shadow-2xl w-full max-w-md overflow-hidden relative"
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full min-w-[320px] max-w-[420px] shrink-0 overflow-hidden relative mx-auto my-auto"
         >
           {/* Top Header Banner */}
-          <div className="bg-gradient-to-r from-primary to-primary-container p-6 text-on-primary relative">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white relative">
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/10 transition-colors text-on-primary"
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/20 transition-colors text-white"
+              title="Close Modal"
             >
               <X className="w-5 h-5" />
             </button>
@@ -79,7 +80,7 @@ export function AuthModal({ isOpen, onClose, onSignIn, onSignUp }: AuthModalProp
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-extrabold text-xl text-white">
+                <h3 className="font-extrabold text-xl text-white tracking-tight">
                   {isSignUp ? "Create Your Account" : "Welcome Back"}
                 </h3>
                 <p className="text-xs text-white/80 font-medium">
@@ -92,49 +93,49 @@ export function AuthModal({ isOpen, onClose, onSignIn, onSignUp }: AuthModalProp
           {/* Form Body */}
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             {errorMsg && (
-              <div className="p-3 rounded-xl bg-red-50 text-red-700 text-xs font-semibold border border-red-200 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-300 text-xs font-semibold border border-red-200 dark:border-red-900 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-600 dark:text-red-400" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
             {successMsg && (
-              <div className="p-3 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 text-xs font-semibold border border-emerald-200 dark:border-emerald-900 flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                 <span>{successMsg}</span>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
+                <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your.email@example.com"
-                  className="w-full pl-9 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-sm font-medium outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-900 dark:text-slate-100 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                 Password
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
+                <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-sm font-medium outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-900 dark:text-slate-100 transition-all"
                 />
               </div>
             </div>
@@ -142,7 +143,7 @@ export function AuthModal({ isOpen, onClose, onSignIn, onSignUp }: AuthModalProp
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-primary text-on-primary font-bold text-sm rounded-xl hover:bg-primary/90 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
             >
               {loading ? (
                 <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -160,14 +161,14 @@ export function AuthModal({ isOpen, onClose, onSignIn, onSignUp }: AuthModalProp
             </button>
 
             {/* Toggle Sign In / Sign Up */}
-            <div className="pt-2 text-center text-xs text-on-surface-variant">
+            <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
               {isSignUp ? (
                 <span>
                   Already have an account?{" "}
                   <button
                     type="button"
                     onClick={() => { setIsSignUp(false); setErrorMsg(null); }}
-                    className="font-bold text-primary hover:underline"
+                    className="font-bold text-blue-600 hover:underline"
                   >
                     Sign In
                   </button>
@@ -178,7 +179,7 @@ export function AuthModal({ isOpen, onClose, onSignIn, onSignUp }: AuthModalProp
                   <button
                     type="button"
                     onClick={() => { setIsSignUp(true); setErrorMsg(null); }}
-                    className="font-bold text-primary hover:underline"
+                    className="font-bold text-blue-600 hover:underline"
                   >
                     Create Account
                   </button>
