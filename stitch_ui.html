@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account Ready Checker</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffddb8",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "surface-tint": "#4d44e3",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-container-high": "#dce9ff",
+                        "surface-dim": "#cbdbf5",
+                        "outline": "#777587",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-primary-fixed": "#0f0069",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-tertiary-container": "#ffd4a4",
+                        "on-surface-variant": "#464555",
+                        "on-tertiary-fixed": "#2a1700",
+                        "primary-fixed": "#e2dfff",
+                        "surface": "#f8f9ff",
+                        "outline-variant": "#c7c4d8",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#4f46e5",
+                        "inverse-primary": "#c3c0ff",
+                        "surface-container": "#e5eeff",
+                        "tertiary-container": "#885500",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-secondary-container": "#00714d",
+                        "tertiary": "#684000",
+                        "surface-container-low": "#eff4ff",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed": "#002113",
+                        "secondary-container": "#6cf8bb",
+                        "background": "#f8f9ff",
+                        "secondary": "#006c49",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "on-surface": "#0b1c30",
+                        "secondary-fixed": "#6ffbbe",
+                        "primary": "#3525cd",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "on-primary-container": "#dad7ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "1rem",
+                        "margin": "2rem",
+                        "xs": "0.25rem",
+                        "sm": "0.5rem",
+                        "xl": "2rem",
+                        "2xl": "3rem",
+                        "base": "4px",
+                        "gutter": "1.5rem",
+                        "lg": "1.5rem"
+                    },
+                    "fontFamily": {
+                        "title-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .soft-shadow {
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1);
+        }
+        .nav-item-active {
+            border-left: 4px solid #3525cd;
+            background-color: rgba(53, 37, 205, 0.05);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md antialiased overflow-x-hidden">
+<!-- Navigation Drawer (SideNav) -->
+<nav class="fixed left-0 top-0 h-screen w-[280px] bg-white/80 dark:bg-inverse-surface/80 backdrop-blur-xl border-r border-outline-variant dark:border-outline shadow-sm hidden md:flex flex-col py-6 z-50">
+<!-- Header Profile -->
+<div class="px-6 mb-8 flex items-center gap-4">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="A professional headshot of a young business woman with dark hair, wearing a sleek blazer, set against a bright, minimalist modern office background with soft lighting. Corporate and polished aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHJnshpmrg_09qSmQiWnAhVKBlVpZbTvgXilvBvDGIT45CFlWPg4w2kRcW5f6raHoNGiL1ddq09EzKucAcFxAAIw0nIEds-tH6nIadbZlxS0KLqxlK9yY83SPIJHGawtTls4ew7Mf55btDd5Lb1rIO--HxrTONYxGt_uJV1PW72eZQGM21t4Ar2NQhF7Ij3yLKC1f0kr0dOGXcauGPNHGkHRGPXkFqoojil1batY-29XQODMHARiO0E3IxgSH_wgbBafVwwge0I9By"/>
+<div>
+<h2 class="font-label-md text-label-md font-semibold text-on-surface">Alex Rivers</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Enterprise Admin</p>
+</div>
+</div>
+<!-- Links -->
+<div class="flex-1 flex flex-col gap-1 px-2">
+<a class="flex items-center gap-3 px-4 py-3 border-l-4 border-primary bg-primary/5 text-primary font-semibold rounded-r-lg cursor-pointer transition-transform active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all duration-200 rounded-lg ml-[4px] cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">supervised_user_circle</span>
+                Accounts
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all duration-200 rounded-lg ml-[4px] cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">analytics</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all duration-200 rounded-lg ml-[4px] cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Settings
+            </a>
+</div>
+<!-- Footer -->
+<div class="mt-auto px-6">
+<a class="flex items-center gap-3 py-3 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Help &amp; Support</span>
+</a>
+<p class="text-label-sm font-label-sm text-outline mt-2">v2.4.0</p>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="md:ml-[280px] min-h-screen flex flex-col w-full max-w-[1440px] mx-auto">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-40 w-full bg-white/80 dark:bg-inverse-surface/80 backdrop-blur-xl border-b border-outline-variant dark:border-outline shadow-sm flex justify-between items-center h-16 px-4 md:px-8">
+<div class="flex items-center gap-4">
+<button class="md:hidden text-on-surface-variant hover:text-primary transition-colors duration-200 ease-in-out cursor-pointer active:scale-95">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="font-title-lg text-title-lg font-bold text-primary dark:text-primary-fixed-dim">Account Ready Checker</h1>
+</div>
+<button class="text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 ease-in-out cursor-pointer active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<!-- Canvas -->
+<main class="flex-1 p-4 md:p-margin pb-24 md:pb-margin flex flex-col gap-8">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+<div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">Track account availability</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Instantly know when every account becomes ready to use across your enterprise network.</p>
+</div>
+<button class="bg-primary-container text-on-primary rounded-lg px-6 py-2.5 font-label-md text-label-md hover:bg-primary-container/90 transition-colors shadow-sm flex items-center gap-2" onclick="document.getElementById('addModal').classList.remove('hidden')">
+<span class="material-symbols-outlined text-sm">add</span>
+                    Add Account
+                </button>
+</div>
+<!-- Stats Grid -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="bg-surface rounded-xl p-4 border border-outline-variant/50 soft-shadow">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Total Accounts</p>
+<p class="font-headline-md text-headline-md text-on-surface">142</p>
+</div>
+<div class="bg-surface rounded-xl p-4 border border-outline-variant/50 soft-shadow">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Ready</p>
+<p class="font-headline-md text-headline-md text-[#006c49]">89</p>
+</div>
+<div class="bg-surface rounded-xl p-4 border border-outline-variant/50 soft-shadow">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Waiting</p>
+<p class="font-headline-md text-headline-md text-[#885500]">45</p>
+</div>
+<div class="bg-surface rounded-xl p-4 border border-outline-variant/50 soft-shadow">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Premium</p>
+<p class="font-headline-md text-headline-md text-primary">32</p>
+</div>
+</div>
+<!-- Toolbar -->
+<div class="flex flex-col sm:flex-row gap-4 justify-between items-center bg-surface p-4 rounded-xl border border-outline-variant/50">
+<div class="relative w-full sm:max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-4 focus:ring-primary/20 focus:border-primary font-body-md text-body-md transition-all" placeholder="Search accounts by email..." type="text"/>
+</div>
+<button class="w-full sm:w-auto px-4 py-2 border border-outline-variant text-on-surface-variant rounded-lg font-label-md text-label-md hover:bg-surface-container-low transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+                    Filter
+                </button>
+</div>
+<!-- Data Table -->
+<div class="bg-surface rounded-xl border border-outline-variant/50 soft-shadow overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-surface-container-high bg-surface-container-lowest">
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Account Email</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Tier</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Status</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md divide-y divide-surface-container-high">
+<!-- Rows generated via JS or assumed server render -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-4 font-medium text-on-surface">admin@example.com</td>
+<td class="py-3 px-4"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-fixed text-on-primary-fixed">Premium</span></td>
+<td class="py-3 px-4"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#ccfbf1] text-[#0f766e]">Ready</span></td>
+<td class="py-3 px-4 text-right">
+<button class="text-outline hover:text-on-surface p-1"><span class="material-symbols-outlined">more_vert</span></button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-4 font-medium text-on-surface">user12@enterprise.co</td>
+<td class="py-3 px-4"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-variant text-on-surface-variant">Standard</span></td>
+<td class="py-3 px-4"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#fef3c7] text-[#b45309]">Waiting</span></td>
+<td class="py-3 px-4 text-right">
+<button class="text-outline hover:text-on-surface p-1"><span class="material-symbols-outlined">more_vert</span></button>
+</td>
+</tr>
+<!-- Repeat for length to show layout -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-4 font-medium text-on-surface">sales-team@company.net</td>
+<td class="py-3 px-4"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-fixed text-on-primary-fixed">Premium</span></td>
+<td class="py-3 px-4"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#ccfbf1] text-[#0f766e]">Ready</span></td>
+<td class="py-3 px-4 text-right">
+<button class="text-outline hover:text-on-surface p-1"><span class="material-symbols-outlined">more_vert</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</div>
+<!-- Modals -->
+<!-- Add Account Modal (Hidden) -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center bg-on-background/20 backdrop-blur-sm p-4" id="addModal">
+<div class="bg-surface w-full max-w-md rounded-xl shadow-xl border border-outline-variant/50 overflow-hidden">
+<div class="px-6 py-4 border-b border-outline-variant/50 flex justify-between items-center">
+<h3 class="font-title-lg text-title-lg text-on-surface">Add New Account</h3>
+<button class="text-outline hover:text-on-surface" onclick="document.getElementById('addModal').classList.add('hidden')">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-6 space-y-4">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1">Email Address</label>
+<input class="w-full px-3 py-2 border border-outline-variant rounded-lg focus:ring-4 focus:ring-primary/20 focus:border-primary" type="email"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1">Account Tier</label>
+<select class="w-full px-3 py-2 border border-outline-variant rounded-lg focus:ring-4 focus:ring-primary/20 focus:border-primary bg-surface-container-lowest">
+<option>Standard</option>
+<option>Premium</option>
+</select>
+</div>
+</div>
+<div class="px-6 py-4 bg-surface-container-lowest border-t border-outline-variant/50 flex justify-end gap-3">
+<button class="px-4 py-2 border border-outline-variant text-on-surface rounded-lg hover:bg-surface-container-low" onclick="document.getElementById('addModal').classList.add('hidden')">Cancel</button>
+<button class="px-4 py-2 bg-primary-container text-on-primary rounded-lg hover:bg-primary-container/90" onclick="document.getElementById('addModal').classList.add('hidden')">Save Account</button>
+</div>
+</div>
+</div>
+</body></html>

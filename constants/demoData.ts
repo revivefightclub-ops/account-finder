@@ -1,0 +1,40 @@
+import { Account } from "@/types";
+
+export const DEMO_ACCOUNTS: Account[] = [
+  {
+    id: "1",
+    email: "admin@example.com",
+    isPremium: true,
+    weeklyLimit: 50,
+    dailyLimit: 10,
+    limitResetType: "Daily",
+    checkingDate: "2026-08-01",
+    checkingTime: "09:00",
+    resetDuration: "1d",
+    modifiedAt: Date.now(),
+  },
+  {
+    id: "2",
+    email: "user12@enterprise.co",
+    isPremium: false,
+    weeklyLimit: 20,
+    dailyLimit: 5,
+    limitResetType: "Weekly",
+    checkingDate: "2026-08-05",
+    checkingTime: "14:30",
+    resetDuration: "2d",
+    modifiedAt: Date.now(),
+  },
+  {
+    id: "3",
+    email: "sales-team@company.net",
+    isPremium: true,
+    weeklyLimit: 100,
+    dailyLimit: 20,
+    limitResetType: "Daily",
+    checkingDate: "2026-08-05",
+    checkingTime: "10:00",
+    resetDuration: "2h",
+    modifiedAt: Date.now(),
+  },
+];
